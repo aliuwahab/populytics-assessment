@@ -10,6 +10,7 @@ use Populytics\Application\RssFeed\UseCases\ListFeedItemsUseCase;
 use Populytics\Application\RssFeed\UseCases\ListUserFeedsUseCase;
 use App\Http\Requests\CreateFeedRequest;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -26,17 +27,30 @@ final class FeedController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $user = Auth::user();
         $userId = $user->id;
 
         $feeds = $this->listUserFeedsUseCase->execute($userId);
-        $feedItems = $this->listFeedItemsUseCase->execute($userId);
+        $selectedFeedId = $request->integer('feed_id');
+
+        $selectedFeedExists = $selectedFeedId !== null
+            && collect($feeds)->contains(fn ($feed) => $feed->id === $selectedFeedId);
+
+        if ($selectedFeedExists) {
+            $feedItems = $this->listFeedItemsUseCase->executeForFeed($selectedFeedId, $userId);
+        } else {
+            $selectedFeedId = null;
+            $feedItems = $this->listFeedItemsUseCase->execute($userId);
+        }
 
         return Inertia::render('Feeds/Index', [
             'feeds' => $feeds,
             'feedItems' => $feedItems,
+            'filters' => [
+                'feedId' => $selectedFeedId,
+            ],
         ]);
     }
 

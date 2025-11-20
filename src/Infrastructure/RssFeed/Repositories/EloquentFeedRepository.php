@@ -28,10 +28,10 @@ final class EloquentFeedRepository implements FeedRepositoryInterface
 
         if ($feed->getId() === null) {
             $feed->setId($model->id);
-            $feed->setCreatedAt($model->created_at ? Carbon::instance($model->created_at) : null);
-            $feed->setUpdatedAt($model->updated_at ? Carbon::instance($model->updated_at) : null);
+            $feed->setCreatedAt($model->created_at ? Carbon::make($model->created_at) : null);
+            $feed->setUpdatedAt($model->updated_at ? Carbon::make($model->updated_at) : null);
         } else {
-            $feed->setUpdatedAt($model->updated_at ? Carbon::instance($model->updated_at) : null);
+            $feed->setUpdatedAt($model->updated_at ? Carbon::make($model->updated_at) : null);
         }
     }
 
@@ -86,11 +86,11 @@ final class EloquentFeedRepository implements FeedRepositoryInterface
         );
 
         $feed->setId($model->id);
-        $feed->setCreatedAt($model->created_at ? Carbon::instance($model->created_at) : null);
-        $feed->setUpdatedAt($model->updated_at ? Carbon::instance($model->updated_at) : null);
+        $feed->setCreatedAt($model->created_at ? Carbon::make($model->created_at) : null);
+        $feed->setUpdatedAt($model->updated_at ? Carbon::make($model->updated_at) : null);
 
         if ($model->last_processed_at) {
-            $feed->setLastProcessedAt(Carbon::instance($model->last_processed_at));
+            $feed->setLastProcessedAt(Carbon::make($model->last_processed_at));
         }
 
         return $feed;

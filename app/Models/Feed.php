@@ -12,6 +12,17 @@ class Feed extends Model
     use HasFactory;
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'last_processed_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>

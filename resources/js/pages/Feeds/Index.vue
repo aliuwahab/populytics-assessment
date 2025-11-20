@@ -4,14 +4,23 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Spinner } from '@/components/ui/spinner'
-import { store as storeFeedRoute } from '@/routes/feeds'
-import { Head, useForm } from '@inertiajs/vue3'
+import { index as feedsIndexRoute, store as storeFeedRoute } from '@/routes/feeds'
+import { Head, router, useForm } from '@inertiajs/vue3'
 import { format } from 'date-fns'
+import { computed, ref, watch } from 'vue'
 
-defineProps<{
-    feeds: any[]
+const props = defineProps<{
+    feeds: Array<{
+        id: number
+        name: string
+    }>
     feedItems: any[]
+    filters: {
+        feedId: number | null
+    }
 }>()
+
+const selectedFeedId = ref<number | null>(props.filters?.feedId ?? null)
 
 const form = useForm({
     name: '',
@@ -36,6 +45,40 @@ const submit = () => {
         preserveScroll: true,
     })
 }
+
+const visitWithFilter = (feedId: number | null) => {
+    router.visit(
+        feedsIndexRoute.url({
+            query: feedId ? { feed_id: feedId } : undefined,
+        }),
+        {
+            preserveScroll: true,
+            preserveState: true,
+            replace: true,
+        }
+    )
+}
+
+const handleFeedFilterChange = (event: Event) => {
+    const value = (event.target as HTMLSelectElement).value
+    const feedId = value ? Number(value) : null
+    selectedFeedId.value = feedId
+    visitWithFilter(feedId)
+}
+
+const clearFeedFilter = () => {
+    selectedFeedId.value = null
+    visitWithFilter(null)
+}
+
+const isFiltered = computed(() => selectedFeedId.value !== null)
+
+watch(
+    () => props.filters?.feedId ?? null,
+    (value) => {
+        selectedFeedId.value = value ?? null
+    }
+)
 </script>
 
 <template>
@@ -101,6 +144,35 @@ const submit = () => {
                     <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
                         Feed Items
                     </h2>
+                    <div class="mb-4 flex flex-col gap-3 rounded-md border border-gray-200 p-4 dark:border-gray-700 sm:flex-row sm:items-end sm:justify-between">
+                        <div class="flex w-full flex-col gap-2 sm:max-w-xs">
+                            <Label for="feed-filter">Filter by feed</Label>
+                            <select
+                                id="feed-filter"
+                                class="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                :value="selectedFeedId ?? ''"
+                                @change="handleFeedFilterChange"
+                                :disabled="feeds.length === 0"
+                            >
+                                <option value="">All feeds</option>
+                                <option
+                                    v-for="feed in feeds"
+                                    :key="feed.id"
+                                    :value="feed.id"
+                                >
+                                    {{ feed.name }}
+                                </option>
+                            </select>
+                        </div>
+                        <Button
+                            variant="ghost"
+                            class="w-full sm:w-auto"
+                            :disabled="!isFiltered"
+                            @click="clearFeedFilter"
+                        >
+                            Clear filter
+                        </Button>
+                    </div>
                     <div v-if="feedItems.length > 0" class="space-y-4">
                         <div
                             v-for="item in feedItems"
@@ -121,7 +193,7 @@ const submit = () => {
                     </div>
                     <div v-else class="text-center text-gray-500 dark:text-gray-400">
                         <p class="py-8">
-                            No feed items to display. Add a feed above and run the processor to see content.
+                            {{ isFiltered ? 'No items for the selected feed. Try syncing again or choose another feed.' : 'No feed items to display. Add a feed above and run the processor to see content.' }}
                         </p>
                     </div>
                 </div>
