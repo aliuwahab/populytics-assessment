@@ -7,7 +7,7 @@ namespace Populytics\Infrastructure\RssFeed\Repositories;
 use Populytics\Application\RssFeed\Repositories\FeedItemRepositoryInterface;
 use Populytics\Domain\RssFeed\Entities\FeedItem;
 use Populytics\Domain\RssFeed\ValueObjects\EntryId;
-use Populytics\Models\FeedItem as FeedItemModel;
+use App\Models\FeedItem as FeedItemModel;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 

@@ -8,7 +8,7 @@ use Populytics\Application\RssFeed\Repositories\FeedRepositoryInterface;
 use Populytics\Domain\RssFeed\Entities\Feed;
 use Populytics\Domain\RssFeed\ValueObjects\FeedName;
 use Populytics\Domain\RssFeed\ValueObjects\FeedUrl;
-use Populytics\Models\Feed as FeedModel;
+use App\Models\Feed as FeedModel;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
