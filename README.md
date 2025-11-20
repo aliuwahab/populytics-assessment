@@ -2,6 +2,69 @@
 
 This repository contains the solution for the practical assessment, implementing a production-ready RSS Feed Reader application using **Domain-Driven Design (DDD)** principles and clean architecture.
 
+## Setup
+
+### 1. Automated setup (recommended)
+
+Run the helper script to install dependencies, create the `.env`, generate the key, provision the SQLite database, and apply migrations:
+
+```bash
+./scripts/setup.sh
+```
+
+> Requirements: PHP 8.3+, Composer, Node.js `>=20.19` or `>=22.12` (see `.nvmrc`), npm, and SQLite.
+
+### 2. Manual setup
+
+1. **Clone the repository**
+    ```bash
+    git clone <repository-url>
+    cd populytics-assessment
+    ```
+2. **Install dependencies**
+
+    **Node.js requirement:** Vite 7 needs Node.js `>=20.19` (LTS) or `>=22.12`. The repository ships with an `.nvmrc` set to `22.12.0`; run `nvm use` (or install that version manually) before installing JS dependencies.
+    ```bash
+    composer install
+    npm install
+    ```
+3. **Configure environment**
+    ```bash
+    cp .env.example .env
+    php artisan key:generate
+    touch database/database.sqlite
+    ```
+4. **Run database migrations**
+    ```bash
+    php artisan migrate
+    ```
+5. **Run the application**
+    ```bash
+    # Start the Vite development server
+    npm run dev
+    ```
+    The application will be available at `http://127.0.0.1:8000` (or the address provided by `php artisan serve`).
+6. **Start queue worker** (optional but recommended)
+    ```bash
+    php artisan queue:work
+    ```
+
+    **Note:** If you don't start a queue worker, you can still process feeds synchronously using the `--sync` flag (see Usage section below).
+7. **Usage**
+    * Navigate to the application and register a new user.
+    * Go to the `/feeds` page.
+    * Add a new RSS feed using the form (e.g., `https://www.php.net/releases/feed.php`).
+        * When a feed is created, it automatically queues a job to process the feed (if queue worker is running)
+    * To process feeds manually:
+        ```bash
+        # Process all feeds asynchronously (requires queue worker)
+        php artisan feeds:process
+
+        # Process all feeds synchronously (no queue worker needed)
+        php artisan feeds:process --sync
+        ```
+    * Refresh the page to see the newly fetched feed items.
+
 ## Challenge Chosen
 
 I have implemented **Option 2: RSS Feed Reader**.
@@ -54,74 +117,6 @@ The application is organized into four distinct layers, each with clear responsi
 - **Scalability**: Easy to swap implementations (e.g., replace Eloquent with another ORM)
 - **Domain Focus**: Business logic is isolated from technical concerns
 - **Type Safety**: Strong typing with value objects and strict types
-
-## Setup Instructions
-
-Please follow these steps to set up and run the application.
-
-1.  **Clone the repository:**
-    ```bash
-    git clone <repository-url>
-    cd populytics-assessment
-    ```
-
-2.  **Install Dependencies:**
-
-    **Node.js requirement:** Vite 7 needs Node.js `>=20.19` (LTS) or `>=22.12`. The repository ships with an `.nvmrc` set to `22.12.0`; run `nvm use` (or install that version manually) before installing JS dependencies.
-    ```bash
-    # Install PHP dependencies
-    composer install
-
-    # Install Node.js dependencies
-    npm install
-    ```
-
-3.  **Configure Environment:**
-    ```bash
-    # Create the environment file
-    cp .env.example .env
-
-    # Generate an application key
-    php artisan key:generate
-
-    # Create the SQLite database file
-    touch database/database.sqlite
-    ```
-
-4.  **Run Database Migrations:**
-    ```bash
-    php artisan migrate
-    ```
-
-5.  **Run the Application:**
-    ```bash
-    # Start the Vite development server
-    npm run dev
-    ```
-    The application will be available at `http://127.0.0.1:8000` (or the address provided by `php artisan serve`).
-
-6.  **Start Queue Worker** (Optional but Recommended):
-    ```bash
-    # For asynchronous feed processing
-    php artisan queue:work
-    ```
-
-    **Note**: If you don't start a queue worker, you can still process feeds synchronously using the `--sync` flag (see Usage section below).
-
-7.  **Usage:**
-    *   Navigate to the application and register a new user.
-    *   Go to the `/feeds` page.
-    *   Add a new RSS feed using the form (e.g., `https://www.php.net/releases/feed.php`).
-        *   When a feed is created, it automatically queues a job to process the feed (if queue worker is running)
-    *   To process feeds manually:
-        ```bash
-        # Process all feeds asynchronously (requires queue worker)
-        php artisan feeds:process
-        
-        # Process all feeds synchronously (no queue worker needed)
-        php artisan feeds:process --sync
-        ```
-    *   Refresh the page to see the newly fetched feed items.
 
 ## Design Choices
 
@@ -553,52 +548,3 @@ If more time were available, I would consider the following enhancements:
     // In app/Console/Kernel.php or routes/console.php
     $schedule->command('feeds:process')->hourly();
     ```
-
-*   **Comprehensive Testing**:
-    *   Unit tests for domain entities and value objects
-    *   Integration tests for use cases
-    *   Feature tests for API endpoints
-    *   Repository tests with database fixtures
-
-*   **Caching Strategy**:
-    *   Cache parsed feed entries to reduce external API calls
-    *   Implement cache invalidation strategies
-    *   Use Redis for distributed caching in multi-server setups
-
-*   **Rate Limiting**: Implement rate limiting for RSS feed fetching to respect source server policies
-
-*   **Feed Validation Enhancement**:
-    *   Pre-validate feed URLs before saving
-    *   Periodic validation of existing feeds
-    *   Automatic cleanup of invalid feeds
-
-*   **UI/UX Enhancements:**
-    *   Real-time feedback with loading indicators
-    *   Edit and delete functionality for subscribed feeds
-    *   Pagination for feed items
-    *   Search and filter capabilities
-    *   Feed refresh status indicators
-
-*   **Monitoring & Observability**:
-    *   Structured logging with context
-    *   Metrics for feed processing success/failure rates
-    *   Alerting for failed feed processing
-    *   Performance monitoring
-
-*   **Advanced Features**:
-    *   Feed categories/tags
-    *   Read/unread status for feed items
-    *   Feed item favoriting
-    *   Export functionality (OPML)
-    *   Full-text search across feed items
-
-*   **API Development**:
-    *   RESTful API endpoints for mobile clients
-    *   API authentication and rate limiting
-    *   OpenAPI/Swagger documentation
-
-*   **Performance Optimizations**:
-    *   Database indexing strategy
-    *   Query optimization with eager loading
-    *   Background job prioritization
-    *   Feed processing batching
