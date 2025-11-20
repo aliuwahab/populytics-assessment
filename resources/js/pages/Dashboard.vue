@@ -52,6 +52,46 @@ const lastProcessedLabel = computed(() => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
+            <div class="grid gap-4 lg:grid-cols-3">
+                <Card class="lg:col-span-2">
+                    <CardHeader>
+                        <CardTitle>Keep your reading list fresh</CardTitle>
+                        <CardDescription>
+                            {{ hasFeeds ? 'Review your feeds and fetch new stories in one place.' : 'It looks like you have no feeds yet — add one to start curating.' }}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <p class="text-muted-foreground">
+                            Jump into the feed dashboard to add sources, queue processing jobs, and review the latest articles from across the web.
+                        </p>
+                    </CardContent>
+                    <CardFooter class="flex flex-wrap gap-2">
+                        <Button as-child>
+                            <Link :href="feedsUrl">
+                                Go to feeds
+                            </Link>
+                        </Button>
+                        <Button variant="ghost" as-child>
+                            <Link :href="feedsUrl + '#add-feed-form'">
+                                Add a new feed
+                            </Link>
+                        </Button>
+                    </CardFooter>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Quick tips</CardTitle>
+                        <CardDescription>Stay on top of your queue</CardDescription>
+                    </CardHeader>
+                    <CardContent class="space-y-4 text-sm text-muted-foreground">
+                        <p>• Run <code>php artisan feeds:process</code> to refresh items.</p>
+                        <p>• Start <code>php artisan queue:work</code> for automatic processing.</p>
+                        <p>• Add high-signal feeds to keep your reading list focused.</p>
+                    </CardContent>
+                </Card>
+            </div>
+
             <div class="grid gap-4 md:grid-cols-3">
                 <Card>
                     <CardHeader>
@@ -89,46 +129,6 @@ const lastProcessedLabel = computed(() => {
                         <p class="text-sm text-muted-foreground">
                             {{ stats.latestFeedName ? `Most recent feed: ${stats.latestFeedName}` : 'Add a feed to get started.' }}
                         </p>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <div class="grid gap-4 lg:grid-cols-3">
-                <Card class="lg:col-span-2">
-                    <CardHeader>
-                        <CardTitle>Keep your reading list fresh</CardTitle>
-                        <CardDescription>
-                            {{ hasFeeds ? 'Review your feeds and fetch new stories in one place.' : 'It looks like you have no feeds yet — add one to start curating.' }}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <p class="text-muted-foreground">
-                            Jump into the feed dashboard to add sources, queue processing jobs, and review the latest articles from across the web.
-                        </p>
-                    </CardContent>
-                    <CardFooter class="flex flex-wrap gap-2">
-                        <Button as-child>
-                            <Link :href="feedsUrl">
-                                Go to feeds
-                            </Link>
-                        </Button>
-                        <Button variant="ghost" as-child>
-                            <Link :href="feedsUrl + '#add-feed-form'">
-                                Add a new feed
-                            </Link>
-                        </Button>
-                    </CardFooter>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Quick tips</CardTitle>
-                        <CardDescription>Stay on top of your queue</CardDescription>
-                    </CardHeader>
-                    <CardContent class="space-y-4 text-sm text-muted-foreground">
-                        <p>• Run <code>php artisan feeds:process</code> to refresh items.</p>
-                        <p>• Start <code>php artisan queue:work</code> for automatic processing.</p>
-                        <p>• Add high-signal feeds to keep your reading list focused.</p>
                     </CardContent>
                 </Card>
             </div>
