@@ -38,9 +38,9 @@ Route::get('dashboard', function () {
         ],
         'feedsUrl' => route('feeds.index'),
     ]);
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth'])->name('dashboard');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/feeds', [FeedController::class, 'index'])->name('feeds.index');
     Route::post('/feeds', [FeedController::class, 'store'])->name('feeds.store');
 });

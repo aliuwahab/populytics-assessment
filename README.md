@@ -2,15 +2,24 @@
 
 This repository contains the solution for the practical assessment, implementing a production-ready RSS Feed Reader application using **Domain-Driven Design (DDD)** principles and clean architecture.
 
+## Challenge Chosen
+
+I have implemented **Option 2: RSS Feed Reader**.
+
+This option was chosen because it provides an excellent opportunity to demonstrate a range of skills relevant to a senior developer role, including database design, interacting with external services, implementing background processing strategies, and building a reactive frontend in a multi-tenant context.
+
+
 ## Setup
 
 ### 1. Automated setup (recommended)
 
-Run the helper script to install dependencies, create the `.env`, generate the key, provision the SQLite database, and apply migrations:
+Run the helper script to install dependencies, create the `.env`, generate the key, provision the SQLite database, apply migrations, and launch the Vite dev server in the background:
 
 ```bash
 ./scripts/setup.sh
 ```
+
+The script writes Vite output to `storage/logs/vite-dev.log` and leaves it running in the background. **Run `php artisan serve` in a separate terminal** after the script completes to bring up the Laravel server.
 
 > Requirements: PHP 8.3+, Composer, Node.js `>=20.19` or `>=22.12` (see `.nvmrc`), npm, and SQLite.
 
@@ -64,12 +73,6 @@ Run the helper script to install dependencies, create the `.env`, generate the k
         php artisan feeds:process --sync
         ```
     * Refresh the page to see the newly fetched feed items.
-
-## Challenge Chosen
-
-I have implemented **Option 2: RSS Feed Reader**.
-
-This option was chosen because it provides an excellent opportunity to demonstrate a range of skills relevant to a senior developer role, including database design, interacting with external services, implementing background processing strategies, and building a reactive frontend in a multi-tenant context.
 
 ## Architecture Overview
 
@@ -540,11 +543,12 @@ With this architecture, testing can be done at multiple levels:
 4. **Feature Tests**: Test HTTP endpoints end-to-end
 
 ## Further Improvements
-
 If more time were available, I would consider the following enhancements:
 
-*   **Automated Processing**: Configure Laravel Scheduler to automatically run `feeds:process` at regular intervals:
-    ```php
-    // In app/Console/Kernel.php or routes/console.php
-    $schedule->command('feeds:process')->hourly();
-    ```
+*   **Caching Strategy**:
+    *   Cache parsed feed entries to reduce external RSS calls and share results across workers
+    *   Implement deterministic invalidation (e.g., flush cache on successful refresh or feed updates)
+*   **Rate Limiting**:
+    *   Enforce per-feed and global fetch intervals using Laravel's `RateLimiter` or Redis counters
+    *   Track provider-specific policies (e.g., 1 request/min) to avoid being blocked by upstream sources
+    *   Surface throttling/back-pressure indicators in the UI so users understand when a feed is temporarily paused
