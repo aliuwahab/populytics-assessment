@@ -3,22 +3,22 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Actions\Fortify\DeleteUserAction;
+use App\Actions\Fortify\UpdateUserProfileInformationAction;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
-use Populytics\Domain\User\Actions\UpdateUserProfileInformationAction;
 
 class ProfileController extends Controller
 {
     /**
      * Show the user's profile settings page.
      */
-    public function show(Request $request): Response
+    public function edit(Request $request): Response
     {
-        return Inertia::render('Settings/Profile', [
+        return Inertia::render('settings/Profile', [
             'status' => $request->session()->get('status'),
         ]);
     }
@@ -28,9 +28,9 @@ class ProfileController extends Controller
      */
     public function update(Request $request, UpdateUserProfileInformationAction $updater): RedirectResponse
     {
-        $updater->update($request->user(), $request->all());
+        $updater->update($request->user(), $request->only('name', 'email'));
 
-        return to_route('profile.show');
+        return to_route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**
@@ -42,8 +42,13 @@ class ProfileController extends Controller
             'password' => ['required', 'current_password'],
         ]);
 
-        $deleteUser->delete($request->user(), $request->all());
+        $deleteUser->delete($request->user(), $request->only('password'));
 
-        return redirect('/');
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('home');
     }
 }

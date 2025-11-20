@@ -1,6 +1,6 @@
 <?php
 
-namespace Populytics\Domain\User\Actions;
+namespace App\Actions\Fortify;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Validator;
@@ -12,11 +12,9 @@ class UpdateUserProfileInformationAction implements UpdatesUserProfileInformatio
     /**
      * Validate and update the given user's profile information.
      *
-     * @param  mixed  $user
-     * @param  array  $input
-     * @return void
+     * @param  array<string, mixed>  $input
      */
-    public function update($user, array $input): void
+    public function update(mixed $user, array $input): void
     {
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
@@ -27,25 +25,32 @@ class UpdateUserProfileInformationAction implements UpdatesUserProfileInformatio
                 'max:255',
                 Rule::unique('users')->ignore($user->id),
             ],
-        ])->validateWithBag('updateProfileInformation');
+        ])->validate();
 
-        if ($input['email'] !== $user->email &&
-            $user instanceof MustVerifyEmail) {
+        if ($input['email'] !== $user->email && $user instanceof MustVerifyEmail) {
             $this->updateVerifiedUser($user, $input);
-        } else {
-            $user->forceFill([
-                'name' => $input['name'],
-                'email' => $input['email'],
-            ])->save();
+
+            return;
         }
+
+        $user->forceFill([
+            'name' => $input['name'],
+            'email' => $input['email'],
+        ])->save();
     }
 
-    protected function updateVerifiedUser($user, array $input): void
+    /**
+     * Update the given verified user's profile information.
+     */
+    protected function updateVerifiedUser(mixed $user, array $input): void
     {
         $user->forceFill([
             'name' => $input['name'],
             'email' => $input['email'],
             'email_verified_at' => null,
         ])->save();
+
+        $user->sendEmailVerificationNotification();
     }
 }
+
