@@ -18,6 +18,18 @@ const form = useForm({
     url: '',
 })
 
+const formatPublishedDate = (value?: string | null) => {
+    if (!value) {
+        return 'Date unavailable'
+    }
+
+    try {
+        return format(new Date(value), 'MMM dd, yyyy')
+    } catch {
+        return 'Date unavailable'
+    }
+}
+
 const submit = () => {
     form.post(storeFeedRoute.url(), {
         onSuccess: () => form.reset(),
@@ -103,7 +115,7 @@ const submit = () => {
                             <div class="mt-2 flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
                                 <span>{{ item.feed_name }}</span>
                                 <span class="h-1 w-1 rounded-full bg-gray-400" />
-                                <span>{{ format(new Date(item.published_at), 'MMM dd, yyyy') }}</span>
+                                <span>{{ formatPublishedDate(item.published_at) }}</span>
                             </div>
                         </div>
                     </div>
